@@ -43,9 +43,30 @@ impl<T, A: StackVecArray<T>> StackVec<A> {
     pub fn len(&self) -> uint { self.len }
 
     /// Return an iterator over the elements.
+    #[inline]
     pub fn iter<'a>(&'a self) -> Items<'a, T, A> {
         Items { data: &self.data, len: self.len(), count: 0u }
     }
+
+    /// Return an immutable reference to the value at the given index.
+    #[inline]
+    pub fn get(&self, idx: uint) -> &T { self.data.get(idx) }
+
+    /// Return a mutable reference to the value at the given index.
+    #[inline]
+    pub fn get_mut(&mut self, idx: uint) -> &mut T { self.data.get_mut(idx) }
+
+    /// Set the given index with the given element.
+    #[inline]
+    pub fn set(&mut self, idx: uint, elem: T) { self.data.set(idx, elem) }
+
+    /// Remove an element from the given index and return it.
+    #[inline]
+    pub fn remove(&mut self, idx: uint) -> T { self.data.remove(idx) }
+
+    /// Return the length of the DspBuffer.
+    #[inline]
+    pub fn size(&self) -> uint { self.data.size() }
 
 }
 
@@ -57,6 +78,7 @@ pub struct Items<'a, T, A: 'a> {
 }
 
 impl<'a, T, A: StackVecArray<T> + 'a> Iterator<&'a T> for Items<'a, T, A> {
+    #[inline]
     fn next(&mut self) -> Option<&'a T> {
         if self.count < self.len {
             let count = self.count;
@@ -65,6 +87,35 @@ impl<'a, T, A: StackVecArray<T> + 'a> Iterator<&'a T> for Items<'a, T, A> {
         } else { None }
     }
 }
+
+/*
+/// A struct for iterating over StackVec's elements mutably.
+pub struct MutItems<'a, T: 'a, A: 'a> {
+    data: &'a mut A,
+    len: uint,
+    count: uint,
+}
+
+impl<'a, T: 'a, A: StackVecArray<T> + 'a> Iterator<&'a mut T> for MutItems<'a, T, A> {
+    #[inline]
+    fn next(&mut self) -> Option<&'a mut T> {
+        if self.count < self.len {
+            let count = self.count;
+            self.count += 1;
+            Some(self.data.get_mut(count))
+        } else { None }
+    }
+}
+*/
+
+
+///// A struct for iterating over a StackVec's elements mutably.
+//pub struct MutItems<'a, T: 'a> {
+//    ptr: *mut T,
+//    end: *mut T,
+//    marker: marker::ContravariantLifetime<'a>,
+//    marker2: marker::NoCopy,
+//}
 
 
 /// A trait to be implemented for all fixed-size arrays that
@@ -84,7 +135,7 @@ pub trait StackVecArray<T> {
     fn size(&self) -> uint;
 }
 
-
+/*
 impl<T, A: StackVecArray<T>> StackVecArray<T> for StackVec<A> {
     #[inline]
     fn new() -> StackVec<A> { StackVec::new() }
@@ -99,7 +150,7 @@ impl<T, A: StackVecArray<T>> StackVecArray<T> for StackVec<A> {
     #[inline]
     fn size(&self) -> uint { self.data.size() }
 }
-
+*/
 
 pub type N2<T> = [Option<T>, ..2];
 pub type N4<T> = [Option<T>, ..4];
